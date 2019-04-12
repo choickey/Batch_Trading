@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.donzbox.mapper.cryptoSignal.CryptoSignalMapper">
+
+    <select id="selectCryptoSignal" parameterType="com.donzbox.domain.cryptoSignal.both.CryptoSignalEntity" resultType="com.donzbox.domain.cryptoSignal.both.CryptoSignalEntity">
+		/* com.donzbox.mapper.CryptoSignalMapper.selectCryptoSignal : CryptoSignal 조회 */
+		  SELECT SEQ             
+		        ,MARKET_CD              
+		        ,COIN_CD                
+		        ,OPENING_PRICE          
+		        ,HIGH_PRICE             
+		        ,LOW_PRICE              
+		        ,CANDLE_DATE_TIME_KST     
+		        ,TRADE_PRICE            
+		        ,TRADE_PRICE_PER         
+		        ,CANDLE_ACC_TRADE_VOLUME  
+		        ,CANDLE_ACC_TRADE_PRICE   
+		        ,CANDLE_ACC_TRADE_PRICE_PER
+		        ,CANDLE_ACC_TRADE_PRICE_CAL
+		        ,TIMESTAMP_REG
+		        ,UNIT
+		        ,CRE_TIME
+		    FROM CRYPTO_SIGNAL
+		   WHERE MARKET_CD = #{marketCd}
+		     AND COIN_CD = #{coinCd}
+		ORDER BY SEQ DESC
+		   LIMIT 360
+	</select>
+	
+    <insert id="insertCryptoSignal" parameterType="com.donzbox.domain.cryptoSignal.both.CryptoSignalEntity">
+		/* com.donzbox.mapper.CryptoSignalMapper.insertCryptoSignal : CryptoSignal 등록 */
+		INSERT INTO CRYPTO_SIGNAL (
+		     MARKET_CD              
+		    ,COIN_CD                
+		    ,OPENING_PRICE          
+		    ,HIGH_PRICE             
+		    ,LOW_PRICE              
+		    ,CANDLE_DATE_TIME_KST     
+		    ,TRADE_PRICE            
+		    ,TRADE_PRICE_PER         
+		    ,CANDLE_ACC_TRADE_VOLUME  
+		    ,CANDLE_ACC_TRADE_PRICE   
+		    ,CANDLE_ACC_TRADE_PRICE_PER
+		    ,CANDLE_ACC_TRADE_PRICE_CAL
+		    ,TIMESTAMP_REG
+		    ,UNIT
+		    ,CRE_TIME
+		)
+		VALUES (
+		     #{marketCd}
+		    ,#{coinCd}
+		    ,#{openingPrice}
+		    ,#{highPrice}
+		    ,#{lowPrice}
+		    ,#{candleDateTimeKst}
+		    ,#{tradePrice}
+		    ,#{tradePricePer}
+		    ,#{candleAccTradeVolume}
+		    ,#{candleAccTradePrice}
+		    ,#{candleAccTradePricePer}
+		    ,#{candleAccTradePriceCal}
+		    ,#{timestampReg}
+		    ,#{unit}
+		    ,NOW()
+		)
+	</insert>
+
+</mapper>

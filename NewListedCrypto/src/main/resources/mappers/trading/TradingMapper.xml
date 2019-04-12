@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.donzbox.mapper.trading.TradingMapper">
+
+	<select id="selectMiniChart" parameterType="com.donzbox.domain.trading.both.ChartEntity" resultType="com.donzbox.domain.trading.both.ChartEntity">
+		/* com.donzbox.mapper.trading.TradingMapper.selectMiniChart : 거래소의 코인별 미니차트(현재일~과거일까지의 종가모음) */
+		     SET @rnum := 0;
+		     SET @prev_coin := '';
+		     SET @prev_trans := '';
+
+		  SELECT K.MARKET_CD
+		        ,K.COIN_CD
+		        ,#{timeFrame}                                          AS TIME_FRAME
+		        ,GROUP_CONCAT(K.END_PRICE ORDER BY K.TRANSACTION_DATE) AS END_PRICES
+		        ,MAX(K.TRANSACTION_DATE)                               AS LAST_TRANSACTION_DATE
+		    FROM (
+		         SELECT J.ROWNUM
+		               ,J.MARKET_CD
+		               ,J.COIN_CD
+		               ,J.END_PRICE
+		               ,J.TRANSACTION_DATE
+		           FROM (
+		                SELECT IF(@prev_coin = I.COIN_CD AND @prev_trans != I.TRANSACTION_DATE, @rnum := @rnum + 1, @rnum := 1 ) as ROWNUM
+		                      ,@prev_coin := I.COIN_CD
+		                      ,@prev_trans := I.TRANSACTION_DATE
+		                      ,I.MARKET_CD
+		                      ,I.COIN_CD
+		                      ,I.END_PRICE
+		                      ,I.TRANSACTION_DATE
+		                 FROM (                 
+		                        SELECT #{marketCd} AS MARKET_CD
+		                              ,H.COIN_CD
+		                              ,H.END_PRICE
+		                              ,H.TRANSACTION_DATE
+		                          FROM TRANSACTIONS_${marketCd}_${timeFrame} H
+		                         WHERE H.COIN_CD IN (
+		                                                SELECT B.COIN_CD
+		                                                  FROM TRADING_MARKET      A
+		                                            INNER JOIN TRADING_MARKET_COIN B ON B.MARKET_CD = A.MARKET_CD
+		                                                 WHERE A.MARKET_CD = #{marketCd}
+		                                            )
+		                      ORDER BY H.COIN_CD
+		                              ,H.TRANSACTION_DATE DESC
+		                      ) I
+		                ) J
+		          <![CDATA[ 
+		          WHERE J.ROWNUM <= #{candleCount}
+		          ]]>
+		         ) K
+		GROUP BY K.COIN_CD
+	</select>
+	
+    <insert id="mergeMiniChart" parameterType="com.donzbox.domain.cryptoSignal.both.CryptoListEntity">
+		/* com.donzbox.mapper.CryptoListMapper.mergeMiniChart : 7초 이상 걸리는 쿼리를 배치를 돌려 이곳의 테이블에 Merge */
+		-- 값이 중복되는지를 판단하는 조건은 테이블의 UNIQUE KEY 이므로 반드시 설정해 줘야 함
+		INSERT INTO TRANSACTIONS_MINICHART (
+		              MARKET_CD
+		             ,COIN_CD
+		             ,TIME_FRAME
+		             ,END_PRICES
+		             ,LAST_TRANSACTION_DATE
+		             ,UPD_TIME
+		             )
+		      VALUES (
+		              #{marketCd}
+		             ,#{coinCd}
+		             ,#{timeFrame}
+		             ,#{endPrices}
+		             ,#{lastTransactionDate}
+		             ,NOW()
+		             )
+		ON DUPLICATE KEY UPDATE
+		              MARKET_CD             = #{marketCd}
+		             ,COIN_CD               = #{coinCd}
+		             ,TIME_FRAME            = #{timeFrame}
+		             ,END_PRICES            = #{endPrices}
+		             ,LAST_TRANSACTION_DATE = #{lastTransactionDate}
+		             ,UPD_TIME              = NOW()		           
+	</insert>
+	
+</mapper>

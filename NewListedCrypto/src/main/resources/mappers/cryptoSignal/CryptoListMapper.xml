@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.donzbox.mapper.cryptoSignal.CryptoListMapper">
+
+    <select id="selectCryptoList" parameterType="com.donzbox.domain.cryptoSignal.both.CryptoListEntity" resultType="com.donzbox.domain.cryptoSignal.both.CryptoListEntity">
+		/* com.donzbox.mapper.CryptoListMapper.selectCryptoList : CryptoList 조회 */
+		  SELECT CODE
+		        ,KOREAN_NAME
+		        ,ENGLISH_NAME
+		        ,PAIR
+		        ,BASE_CURRENCY_CODE
+		        ,QUOTE_CURRENCY_CODE
+		        ,EXCHANGE
+		        ,TRADE_STATUS
+		        ,MARKET_STATE
+		        ,MARKET_STATE_FOR_IOS
+		        ,IS_TRADING_SUSPENDED
+		        ,BASE_CURRENCY_DECIMAL_PLACE
+		        ,QUOTE_CURRENCY_DECIMAL_PLACE
+		        ,DELISTING_DATE
+		        ,TIMESTAMP_REG
+		        ,UPD_TIME
+		        ,CRE_TIME
+		    FROM CRYPTO_LIST
+		ORDER BY TIMESTAMP_REG ASC
+	</select>
+	
+    <insert id="mergeCryptoList" parameterType="com.donzbox.domain.cryptoSignal.both.CryptoListEntity">
+		/* com.donzbox.mapper.CryptoListMapper.mergeCryptoList : CryptoList Merge */
+		-- 값이 중복되는지를 판단하는 조건은 테이블의 UNIQUE KEY 이므로 반드시 설정해 줘야 함
+		INSERT INTO CRYPTO_LIST (
+		              CODE
+		             ,KOREAN_NAME
+		             ,ENGLISH_NAME
+		             ,PAIR
+		             ,BASE_CURRENCY_CODE
+		             ,QUOTE_CURRENCY_CODE
+		             ,EXCHANGE
+		             ,TRADE_STATUS
+		             ,MARKET_STATE
+		             ,MARKET_STATE_FOR_IOS
+		             ,IS_TRADING_SUSPENDED
+		             ,BASE_CURRENCY_DECIMAL_PLACE
+		             ,QUOTE_CURRENCY_DECIMAL_PLACE
+		             ,DELISTING_DATE
+		             ,TIMESTAMP_REG
+		             ,UPD_TIME
+		             ,CRE_TIME
+				     )
+		      VALUES (
+		              #{code}
+		             ,#{koreanName}
+		             ,#{englishName}
+		             ,#{pair}
+		             ,#{baseCurrencyCode}
+		             ,#{quoteCurrencyCode}
+		             ,#{exchange}
+		             ,#{tradeStatus}
+		             ,#{marketState}
+		             ,#{marketStateForIOS}
+		             ,#{isTradingSuspended}
+		             ,#{baseCurrencyDecimalPlace}
+		             ,#{quoteCurrencyDecimalPlace}
+		             ,#{delistingDate}
+		             ,#{timestampReg}
+		             ,NOW()
+		             ,NOW()
+				     )
+		ON DUPLICATE KEY UPDATE
+		              CODE                         = #{code}
+		             ,KOREAN_NAME                  = #{koreanName}
+		             ,ENGLISH_NAME                 = #{englishName}
+		             ,PAIR                         = #{pair}
+		             ,BASE_CURRENCY_CODE           = #{baseCurrencyCode}
+		             ,QUOTE_CURRENCY_CODE          = #{quoteCurrencyCode}
+		             ,EXCHANGE                     = #{exchange}
+		             ,TRADE_STATUS                 = #{tradeStatus}
+		             ,MARKET_STATE                 = #{marketState}
+		             ,MARKET_STATE_FOR_IOS         = #{marketStateForIOS}
+		             ,IS_TRADING_SUSPENDED         = #{isTradingSuspended}
+		             ,BASE_CURRENCY_DECIMAL_PLACE  = #{baseCurrencyDecimalPlace}
+		             ,QUOTE_CURRENCY_DECIMAL_PLACE = #{quoteCurrencyDecimalPlace}
+		             ,DELISTING_DATE               = #{delistingDate}
+		             ,TIMESTAMP_REG                = #{timestampReg}
+		             ,UPD_TIME                     = NOW()		           
+	</insert>
+
+    <insert id="insertBotRuntime" parameterType="com.donzbox.domain.cryptoSignal.both.CryptoBotEntity">
+		/* com.donzbox.mapper.CryptoListMapper.insertBotRuntime : 봇 기동시간 갱신 */
+		INSERT INTO CRYPTO_BOT (
+		              BOT_CD
+		             ,BOT_NM
+		             ,UPD_TIME
+				     )
+		      VALUES (
+		              #{botCd}
+		             ,#{botNm}
+		             ,NOW()
+				     )
+		ON DUPLICATE KEY UPDATE
+		              BOT_CD   = #{botCd}
+		             ,BOT_NM   = #{botNm}
+		             ,UPD_TIME = NOW()		           
+	</insert>
+</mapper>
